@@ -5,17 +5,24 @@
 #include<algorithm>
 using namespace std;
 
+
 bool isPalindrome(int x);//Accepted
 int romanToInt(string s);//Accepted
-string longestCommonPrefix(vector<string>& strs);
 ListNode* mergeTwoLists(ListNode* l1, ListNode* l2);//Accepted
 void deleteNode(ListNode* node);//Accepted
 int maxSubArray(vector<int>& nums);
 int climbStairs(int n);
+string longestCommonPrefix(vector<string>& strs);//Accepted
+void merge(vector<int>& nums1, int m, vector<int>& nums2, int n);//Accepted
+void mergeS1(vector<int>& nums1, int m, vector<int>& nums2, int n);//Other solution
+
+void myPrint(vector<int>& data);
 
 
 int main() {
-	cout << climbStairs(2) << endl;
+	vector<int> n1 = {2,0};
+	vector<int> n2 = { 1 };
+	mergeS1(n1, 1, n2, 1);
 	system("pause");
 }
 
@@ -60,10 +67,6 @@ int romanToInt(string s) {
 		}
 	}
 	return 1000 * c[6] + 500 * c[5] + 100 * c[4] + 50 * c[3] + 10 * c[2] + 5 * c[1] + c[0] - reduction;
-}
-
-string longestCommonPrefix(vector<string>& strs) {
-	return "test";
 }
 
 void display(ListNode* result) {
@@ -192,4 +195,62 @@ ListNode *getIntersectionNode(ListNode *headA, ListNode *headB) {//https://leetc
 		}
 	}
 	return NULL;
+}
+
+//14.longest-common-prefix
+string longestCommonPrefix(vector<string>& strs) {
+	string commPrefix = "";
+	if (strs.size() == 0) {
+		return commPrefix;
+	}
+	commPrefix = strs[0];
+	for (int i = 1; i < strs.size(); i++) {
+		string temp = "";
+		int minLen = min(commPrefix.size(), strs[i].size());
+		for (int j = 0; j < minLen; j++) {
+			if (commPrefix[j] == strs[i][j]) {
+				temp += commPrefix[j];
+			}
+			else break; //不跳出循环会比较整个字符串而不是前缀
+		}
+		commPrefix = temp;
+		if (commPrefix == "")
+			return commPrefix;
+	}
+	return commPrefix;
+}
+
+//88.merge-sorted-array
+void merge(vector<int>& nums1, int m, vector<int>& nums2, int n) {
+	if (m == 0) {
+		nums1 = nums2;
+		return;
+	}
+	if (n == 0) {
+		return;
+	}
+	for (int i = m + n - 1; i > -1; i--) {
+		if (m>0 && (nums1[m - 1] >= nums2[n - 1])) { 
+			nums1[i] = nums1[m - 1]; 
+			m--;
+		}
+		else {
+			nums1[i] = nums2[n - 1];
+			n--;
+		}
+		if (n == 0)break;
+	}
+}
+
+void mergeS1(vector<int>& nums1, int m, vector<int>& nums2, int n) {
+	nums1 = vector<int>(nums1.begin(), nums1.begin() + m);
+	nums1.insert(nums1.end(), nums2.begin(), nums2.end());
+	sort(nums1.begin(), nums1.end());
+}
+
+void myPrint(vector<int>& data) {
+	for (auto c : data) {
+		cout << c << " ";
+	}
+	cout << endl;
 }
