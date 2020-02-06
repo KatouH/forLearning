@@ -3,8 +3,11 @@
 #include<vector>
 #include<unordered_map>
 #include<algorithm>
+#include<climits>
 using namespace std;
 
+
+void myPrint(vector<int>& data);
 
 bool isPalindrome(int x);//Accepted
 int romanToInt(string s);//Accepted
@@ -15,14 +18,13 @@ int climbStairs(int n);
 string longestCommonPrefix(vector<string>& strs);//Accepted
 void merge(vector<int>& nums1, int m, vector<int>& nums2, int n);//Accepted
 void mergeS1(vector<int>& nums1, int m, vector<int>& nums2, int n);//Other solution
-
-void myPrint(vector<int>& data);
+int maxProfit(vector<int>& prices);//Ac r
+int maxProfit2(vector<int>& prices);//Ac r
 
 
 int main() {
-	vector<int> n1 = {2,0};
-	vector<int> n2 = { 1 };
-	mergeS1(n1, 1, n2, 1);
+	vector<int> n1 = {  };
+	cout << maxProfit2(n1) << endl;
 	system("pause");
 }
 
@@ -253,4 +255,49 @@ void myPrint(vector<int>& data) {
 		cout << c << " ";
 	}
 	cout << endl;
+}
+
+// 121.best-time-to-buy-and-sell-stock //iterator begin end 没有顺序大小关系
+int maxProfit(vector<int>& prices) {
+	int maxProfit = 0;
+	if (prices.size() < 2)return maxProfit;
+	for (auto s = prices.begin(); s != prices.end()-1; s++) {
+		for (auto e = prices.end()-1; e != s; e--) {
+			if (*s < *e) {
+				if (maxProfit < (*e - *s)) {
+					maxProfit = *e - *s;
+				}
+			}
+		}
+	}
+	return maxProfit;
+}
+// 局部最优解->全局最优解 一次遍历
+int maxProfitS1(vector<int>& prices) {
+	int minPrice = INT_MAX;
+	int maxProfit = 0;
+	for (int i = 0; i < prices.size(); i++) {
+		if (prices[i] < minPrice) {
+			minPrice = prices[i];
+		}
+		else if(prices[i]-minPrice>maxProfit){
+			maxProfit = prices[i] - minPrice;
+		}
+	}
+	return maxProfit;
+}
+
+// 122.best-time-to-buy-and-sell-stock-ii //???
+int maxProfit2(vector<int>& prices) {
+	//7,1,5,3,6,4
+	int currMin = 0;
+	int sumProfit = 0;
+	int i = 0;
+	while (i < (int)prices.size()-1) {
+		while (i<prices.size() - 1 && prices[i] >= prices[i + 1])i++;
+		currMin = prices[i];
+		while (i < prices.size() - 1 && prices[i] <= prices[i + 1])i++;
+		sumProfit += (prices[i] - currMin);
+	}
+	return sumProfit;
 }
