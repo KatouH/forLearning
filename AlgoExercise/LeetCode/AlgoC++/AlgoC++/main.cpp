@@ -4,6 +4,7 @@
 #include<unordered_map>
 #include<algorithm>
 #include<climits>
+#include<stack>
 using namespace std;
 
 
@@ -20,11 +21,69 @@ void merge(vector<int>& nums1, int m, vector<int>& nums2, int n);//Accepted
 void mergeS1(vector<int>& nums1, int m, vector<int>& nums2, int n);//Other solution
 int maxProfit(vector<int>& prices);//Ac r
 int maxProfit2(vector<int>& prices);//Ac r
+bool isPowerOfTwo(int n);//Ac 仅正数
+string reverseWords(string s);//Ac r
+bool isSymmetric(TreeNode* root);//Ac r
+int rob(vector<int>& nums);//Ac dp r
+bool isPalindrome(ListNode* head);//Ac r
+int hammingDistance(int x, int y);//Ac 二进制 |或 &与 ^异或 ~取反 >>左移 <<右移
+TreeNode* convertBST(TreeNode* root);
+
+// 155.min-stack
+class MinStack {
+public:
+	/** initialize your data structure here. */
+	struct ListNode {
+		int val;
+		ListNode* next = NULL;
+		ListNode(int v) :val(v) {};
+	}*stackHead=NULL;
+
+	MinStack() {
+	}
+
+	void push(int x) {
+		ListNode* newNode = new ListNode(x);
+		newNode->next = stackHead;
+		stackHead = newNode;
+	}
+
+	void pop() {
+		ListNode* popNode = stackHead;
+		stackHead = stackHead->next;
+		delete popNode;
+	}
+
+	int top() {
+		return stackHead->val;
+	}
+
+	int getMin() {
+		ListNode* currNode = stackHead;
+		int min = INT_MAX;
+		while (currNode != NULL) {
+			if (currNode->val < min) {
+				min = currNode->val;
+			}
+			currNode = currNode->next;
+		}
+		return min;
+	}
+
+	void printStack() {
+		ListNode* currNode = stackHead;
+		while (currNode != NULL) { 
+			cout << currNode->val << endl;
+			currNode = currNode->next;
+		}
+	}
+};
 
 
 int main() {
-	vector<int> n1 = {  };
-	cout << maxProfit2(n1) << endl;
+	TreeNode* root = new TreeNode(5);
+	root->left = new TreeNode(2);
+	root->right = new TreeNode(13);
 	system("pause");
 }
 
@@ -113,29 +172,6 @@ ListNode* mergeTwoLists(ListNode* l1, ListNode* l2) {
 }
 
 
-class MinStack {
-public:
-	/** initialize your data structure here. */
-	MinStack() {
-
-	}
-
-	void push(int x) {
-
-	}
-
-	void pop() {
-
-	}
-
-	int top() {
-
-	}
-
-	int getMin() {
-
-	}
-};
 
 void deleteNode(ListNode* node) { //删除链表节点，将删除节点改为下一节点的副本，并删除下一个节点。
 	ListNode* deleteNode = node->next;
@@ -300,4 +336,253 @@ int maxProfit2(vector<int>& prices) {
 		sumProfit += (prices[i] - currMin);
 	}
 	return sumProfit;
+}
+
+// 169.majority-element
+int majorityElement(vector<int>& nums) {
+	unordered_map<int, int> cou;
+	for (int i = 0; i < nums.size(); i++) {
+		if (cou.count(nums[i])==0) {
+			cou[nums[i]] = 1;
+		}
+		else {
+			++cou[nums[i]];
+		}
+		if (cou[nums[i]] > nums.size() / 2)
+			return nums[i];
+	}
+	return 0;
+}
+
+// 206.reverse-linked-list-iter 1->2->3->NULL 
+ListNode* reverseList(ListNode* head) {
+	ListNode* currNode = NULL;
+	ListNode* tmpNode = head;
+
+	while (tmpNode != NULL) {
+		head = tmpNode;
+		tmpNode = tmpNode->next;
+		head->next = currNode;
+		currNode = head;
+	}
+	return head;
+}
+
+// ??
+ListNode* reverseListCurr(ListNode* head) {
+	return NULL;
+}
+
+ //power-of-two
+bool isPowerOfTwo(int n) {
+	int i = 0;
+	int j = 1;
+	while (j > 0) {
+		if (n == j)return true;
+		j = j << 1;
+		cout << j << endl;
+	}
+	return false;
+}
+
+// 235.lowest-common-ancestor-of-a-binary-search-tree 递归
+TreeNode* lowestCommonAncestor(TreeNode* root, TreeNode* p, TreeNode* q) {
+	TreeNode* commParent = root;
+	if (p->val > root->val&&q->val > root->val) {
+		commParent = lowestCommonAncestor(commParent->right, p, q);
+	}
+	else if (p->val < root->val&&q->val < root->val) {
+		commParent = lowestCommonAncestor(commParent->left, p, q);
+	}
+
+	return commParent;
+}
+//二叉搜索数 left->val < root->val < right->val
+
+// 292.
+bool canWinNim(int n) {
+	return !(n % 4 == 0);
+}
+
+// 557.
+string reverseWords(string s) {
+	string tmp = "";
+	string news = "";
+	for (int i = 0; i < s.size(); i++) {
+		if (s[i] != ' ') {
+			tmp += s[i];
+		}
+		else {
+			reverse(tmp.begin(), tmp.end());
+			news = news + tmp + " ";
+			tmp = "";
+		}
+	}
+	reverse(tmp.begin(), tmp.end());
+	news += tmp;
+	return news;
+}
+
+
+bool isMirror(const TreeNode* tree1,const TreeNode* tree2) {
+	if (tree1 == NULL && tree2 == NULL)return true;
+	if (tree1 == NULL || tree2 == NULL)return false;
+
+	return (tree1->val == tree2->val) && isMirror(tree1->left, tree2->right) && isMirror(tree1->right, tree2->left);
+}
+// 101.symmetric-tree //用两个数镜像遍历
+bool isSymmetric(TreeNode* root) {
+	//中序遍历 
+	//stack<TreeNode*> sroot;
+	//TreeNode* currNode = root;
+	//vector<int> middSeq;
+	//while (currNode != NULL) {
+	//	sroot.push(currNode);
+	//	currNode = currNode->left;
+	//}
+
+	//while(!sroot.empty()) {
+	//	currNode = sroot.top();
+	//	sroot.pop();
+	//	middSeq.push_back(currNode->val);
+	//	if (currNode->right != NULL) {
+	//		currNode = currNode->right;
+	//		while (currNode != NULL) {
+	//			sroot.push(currNode);
+	//			currNode = currNode->left;
+	//		}
+	//	}
+	//}
+	
+	return 	isMirror(root, root);
+}
+
+// 198.house-robber
+int rob(vector<int>& nums) {
+	int sumMax = 0;
+	int k_1 = 0;
+	int k_2 = 0;
+	for (int i = 0; i < nums.size(); i++) {
+		sumMax = max(k_1, k_2+nums[i]);
+		k_2 = k_1;
+		k_1 = sumMax;
+	}
+	return sumMax;
+}
+
+TreeNode* invertTree(TreeNode* root) {
+	if (root == NULL)return root;
+	stack<TreeNode*> sroot;
+	TreeNode* currNode;
+	sroot.push(root);
+	while (!sroot.empty()) {
+		currNode = sroot.top();
+		sroot.pop();
+		TreeNode* tmpNode = currNode->right;
+		currNode->right = currNode->left;
+		currNode->left = tmpNode;
+		if (currNode->left != NULL) {
+			sroot.push(currNode->left);
+		}
+		if (currNode->right != NULL) {
+			sroot.push(currNode->right);
+		}
+	}
+	return root;
+}
+
+// 其他解法：快慢指针 找到中间位置（慢指针走一步，快指针走两步）
+// 反转指针比较
+// 递归比较？？？
+bool isPalindrome(ListNode* head) {
+	if (head == NULL)return head;
+	string list;
+	for (auto curr = head; curr != NULL; curr = head->next) {
+		cout << curr->val << " " << curr->val + '0' << endl;
+		list += (curr->val + '0');
+	}
+	string prelist = list;
+	reverse(list.begin(), list.end());
+	return (prelist == list);
+}
+
+// 448. find-all-numbers-disappeared-in-an-array
+vector<int> findDisappearedNumbers(vector<int>& nums) {
+
+	vector<int> res;
+
+	for (int i = 0; i < nums.size(); i++) {
+		while (nums[i] != (i + 1)) {
+			if (nums[nums[i] - 1] != nums[i]) {
+				int tmp = nums[nums[i] - 1];
+				nums[nums[i] - 1] = nums[i];
+				nums[i] = tmp;
+			}
+			else {
+				break;
+			}
+		}
+	}
+
+	for (int i = 0; i < nums.size(); i++) {
+		if (nums[i] != (i + 1)) {
+			res.push_back(i + 1);
+		}
+	}
+
+	return res;
+}
+
+// 461.hamming-distance
+int hammingDistance(int x, int y) {
+	int dis = 0;
+	int res = x ^ y;
+	while (res != 0) {
+		if (res & 1 == 1)dis++;
+		res = res >> 1;
+	}
+	return dis;
+}
+
+// 538.convert-bst-to-greater-tree 中序遍历思想
+TreeNode* convertBST(TreeNode* root) {
+	stack<TreeNode*> sroot;
+	TreeNode* currNode=root;
+	vector<TreeNode*> midSeq;
+	vector<int> middSeq;
+
+	while (currNode != NULL) {
+		sroot.push(currNode);
+		currNode = currNode->left;
+	}
+
+	while (!sroot.empty()) {
+		currNode = sroot.top();
+		sroot.pop();
+		for (auto &a : midSeq) {
+			a->val += currNode->val;
+			cout << a->val << " ";
+		}
+		cout << endl;
+		midSeq.push_back(currNode);
+		middSeq.push_back(currNode->val);
+		if (currNode->right != NULL) {
+			currNode = currNode->right;
+			while (currNode != NULL) {
+				sroot.push(currNode);
+				currNode = currNode->left;
+			}
+		}
+	}
+	return root;
+}
+// 从右向左，每个节点将从上一位置的累加数加到自己的节点中,累加数为全局
+int addSum = 0;
+TreeNode* convertBSTS1(TreeNode* root) {
+	if (root == NULL)return root;
+	convertBSTS1(root->right);
+	root->val += addSum;
+	addSum = root->val;
+	convertBSTS1(root->left);
+	return root;
 }
