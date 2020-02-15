@@ -28,6 +28,18 @@ int rob(vector<int>& nums);//Ac dp r
 bool isPalindrome(ListNode* head);//Ac r
 int hammingDistance(int x, int y);//Ac 二进制 |或 &与 ^异或 ~取反 >>左移 <<右移
 TreeNode* convertBST(TreeNode* root);
+string countAndSay(int n);
+int mySqrt(int x);
+TreeNode* sortedArrayToBST(vector<int>& nums);
+vector<vector<int>> generate(int numRows);
+bool isPalindrome(string s);
+bool isPalindromeS1(string s);
+int titleToNumber(string s);
+uint32_t reverseBits(uint32_t n);
+bool isHappy(int n);
+int missingNumber(vector<int>& nums);
+int lengthOfLastWord(string s);
+string addBinary(string a, string b);
 
 // 155.min-stack
 class MinStack {
@@ -79,13 +91,24 @@ public:
 	}
 };
 
-
+//****************************  Main **************************************
 int main() {
 	TreeNode* root = new TreeNode(5);
 	root->left = new TreeNode(2);
 	root->right = new TreeNode(13);
+	vector<int> test{ 3,0,1 };
+	cout<<addBinary("1010","1011")<<endl;
+
 	system("pause");
 }
+
+
+
+
+
+
+
+
 
 bool isPalindrome(int x) {
 	string str = to_string(x);
@@ -585,4 +608,340 @@ TreeNode* convertBSTS1(TreeNode* root) {
 	addSum = root->val;
 	convertBSTS1(root->left);
 	return root;
+}
+
+
+// 581.shortest-unsorted-continuous-subarray
+int findUnsortedSubarray(vector<int>& nums) {
+	vector<int> preNums = nums;
+	int len = 0;
+	sort(nums.begin(), nums.end());
+	int head(0), footer(nums.size() - 1);
+	for (; head < nums.size(); head++) {
+		if (nums[head] != preNums[head])break;
+	}
+	for (; footer > -1; footer--){
+		if (nums[footer] != preNums[footer])break;
+	}
+	len = footer - head + 1;
+	return (len>0?len:0);
+}
+
+
+// 617.merge-two-binary-trees
+TreeNode* mergeTrees(TreeNode* t1, TreeNode* t2) {
+	if (t1&&t2) {
+		t1->val += t2->val;
+	}
+	else if (t1||t2) {
+		return (t1 ? t1 : t2);
+	}
+	if (t1->left&&t2->left) {
+		mergeTrees(t1->left, t2->left);
+	}
+	else if (t1->left == NULL && t2->left != NULL) {
+		t1->left = t2->left;
+	}
+	if (t1->right&&t2->right) {
+		mergeTrees(t1->right, t2->right);
+	}
+	else if (t1->right == NULL && t2->right != NULL) {
+		t1->right = t2->right;
+	}
+	return t1;
+
+}
+
+
+// 38.count-and-say
+string countAndSay(int n) {
+	if (n == 1) {
+		return "1";
+	}
+	string preSeq = countAndSay(n - 1);
+	string currSeq = "";
+	for (int i = 0; i < preSeq.size(); i++) {
+		int count = 0;
+		for (int j = i; j < preSeq.size(); j++) {
+			if (preSeq[i] != preSeq[j]) { 
+				i = j - 1;
+				break; 
+			}
+			count++;
+			i = j;
+		}
+		currSeq += to_string(count) + preSeq[i];
+	}
+	return currSeq;
+}
+
+int mySqrt(int x) {
+	int i = 0;
+	for (; i <= x / 2; i++) {
+		if (i*i <= x && (i + 1)*(i + 1) > x)break;
+		cout << i << endl;
+	}
+	return i;
+}
+template<typename T>
+void pVector(const vector<T>& vec) {
+	for (auto c: vec) {
+		cout << c << " ";
+	}
+	cout << endl;
+}
+ 
+TreeNode* sortedArrayToBST(vector<int>& nums) {
+	int mid = nums.size() / 2;
+	TreeNode* newNode = new TreeNode(nums[mid]);
+	if (nums.size() == 1) {
+		return newNode;
+	}
+	vector<int> left = vector<int>(nums.begin(), nums.begin() + mid);
+	newNode->left = sortedArrayToBST(left);
+	if (mid + 1 < nums.size()) {
+		vector<int> right =  vector<int>(nums.begin() + mid + 1, nums.end());
+		newNode->right = sortedArrayToBST(right);
+	}
+	return newNode;
+}
+
+vector<vector<int>> generate(int numRows) {
+	vector<vector<int>> pascals{ {1},{1,1} };
+	if (numRows <= 2)return vector<vector<int>>(pascals.begin(), pascals.begin() + numRows);
+	for (int i = 2; i < numRows; i++) {
+		vector<int> row{ 1 };
+		for (int j = 1; j < i; j++) {
+			row.push_back(pascals[i - 1][j - 1] + pascals[i - 1][j]);
+		}
+		row.push_back(1);
+		pVector(row);
+		pascals.push_back(row);
+	}
+	return pascals;
+}
+
+bool isPalindrome(string s) {
+	if (s == "")return true;
+	vector<char> tmp;
+	for (auto c : s) {
+		if ((c >= 'a'&&c <= 'z')||(c>='0'&&c<='9'))tmp.push_back(c);
+		else if (c >= 'A'&&c <= 'Z')tmp.push_back(c - 'A' + 'a');
+	}
+	vector<char> preTmp = tmp;
+	reverse(tmp.begin(), tmp.end());
+	for (int i = 0; i < tmp.size(); i++) {
+		if (preTmp[i] != tmp[i])return false;
+	}
+	return true;
+}
+
+// 双指针
+bool isPalindromeS1(string s) {
+	int pheader = 0;
+	int pfooter = s.size()-1;
+	while (pheader != s.size()) {
+		if (!isalnum(s[pheader])) { pheader++;  continue; };
+		if (!isalnum(s[pfooter])) { pfooter--;  continue;};
+		if (tolower(s[pheader]) == tolower(s[pfooter])) {
+			pheader++;
+			pfooter--;
+		}
+		else {
+			return false;
+		}
+	}
+	return true;
+}
+
+int titleToNumber(string s) {
+	int num=0;
+	int count = 1;
+	for (int i = s.size()-1; i > -1;i--) {
+		cout << num << " " << count << endl;
+		cout << s[i] - 'A' + 1 << endl;
+		num += ((s[i] - 'A' + 1)*count);
+		count *= 26;
+	}
+	return num;
+}
+
+int firstUniqChar(string s) {
+	if (s == "")return -1;
+	unordered_map<char, int> tmp;
+	for (int i = 0; i < s.size(); i++) {
+		if (tmp.count(s[i]) == 0)tmp[s[i]]=1;
+		else {
+			tmp[s[i]]++;
+		}
+	}
+	for (int i = 0; i < s.size(); i++) {
+		if (tmp[s[i]] == 1)return s[i];
+	}
+	return -1;
+}
+
+// (1&n)&res 获取当前位，现处理当前位再一位 循环31一位，移位32，处理最后一位
+uint32_t reverseBits(uint32_t n) {
+	uint32_t res=0;
+	for (int i = 0; i < 31; i++) {
+		res = (1 & n) | res;
+		n = n >> 1;
+		res = res << 1;
+	}
+	res = (1 & n) | res;
+	return res;
+}
+
+int hammingWeight(uint32_t n) {
+	int count = 0;
+	for (int i = 0; i < 31; i++) {
+		if (n & 1) {
+			count++;
+		}
+		n >> 1;
+	}
+	if (n & 1) {
+		count++;
+	}
+	return count;
+}
+
+
+int caResult(int n) {
+	int tmp = n;
+	int res=0;
+	while (tmp != 0) {
+		res += ((tmp % 10) * (tmp % 10));
+		tmp = tmp / 10;
+	}
+	return res;
+}
+// 快慢指针可以判断是否存在循坏， 当慢指针走完一个周期，快指针正好走完两个周期（慢指针一步，快指针两部）
+bool isHappy(int n) {
+	
+	long fast = n;
+	long slow = n;
+	int tmp = n;
+
+	do {
+		slow = caResult(slow);
+		for (int i = 0; i < 2; i++) {
+			fast = caResult(fast);
+			if (fast == 1)return true;
+		}
+		cout << slow << " "<<fast << endl;
+
+	} while (fast!=slow);
+	return false;
+}
+
+//筛法
+int countPrimes(int n) {
+	int* arrPrimes = new int[n];
+	int count = 0;
+	for (int i = 0; i < n; i++) {
+		arrPrimes[i] = i;
+	}
+	for (int i = 0; i <= (int)sqrt(n); i++) {
+		if (i != 0 && i != 1) {
+			for (int j = 2; j*i < n; j++) {
+				if(arrPrimes[j*i]!=0)arrPrimes[j*i] = 0;
+			}
+		}
+	}
+	for (int i = 0; i < n; i++) {
+		if (i != 0 && i != 1)count++;
+	}
+
+	return count;
+}
+
+int missingNumber(vector<int>& nums) {
+	vector<int> nums_c( nums.size()+1,-1);
+	for (int i = 0; i < nums.size(); i++) {
+		nums_c[nums[i]] = nums[i];
+	}
+	for (int i = 0; i < nums_c.size(); i++) {
+		if (nums_c[i] == -1)return i;
+	}
+	return 0;
+}
+
+bool isPowerOfThree(int n) {
+	int tmp = n;
+	if (n == 1)return true;
+	while (tmp != 3) {
+		if (tmp % 3 != 0)return false;
+		tmp = tmp / 3;
+	}
+	return true;
+}
+
+//位运算实现加法器
+int getSum(int a, int b) {
+	return a + b;//？
+}
+
+vector<string> fizzBuzz(int n) {
+	vector<string> str;
+	for (int i = 1; i <= n; i++) {
+		if (i % 15 == 0)str.push_back("FizzBuzz");
+		else if (i % 3 == 0)str.push_back("Fizz");
+		else if (i % 5 == 0)str.push_back("Buzz");
+		else {
+			str.push_back(to_string(i));
+		}
+	}
+	return str;
+}
+
+// remove algorithm头文件中 删除vector元素 删除的元素被替换为默认值，并移动至尾部，并返回“删除”后新的end() 不改变size  
+// erase vector 成员函数 删除指定位置元素 并返回下一个迭代器，改变size
+// remove erase 联合使用删除所有指定元素 nums.erase(remove(begin,end,deleteEle),end);
+int removeElement(vector<int>& nums, int val) {
+	nums.erase(remove(nums.begin(), nums.end(), val), nums.end());
+	return nums.size();
+}
+
+int searchInsert(vector<int>& nums, int target) {
+	for (int i = 0; i < nums.size(); i++) {
+		if (target == nums[i])return i;
+		else if (target > nums[i])return i;
+	}
+	return 0;
+}
+
+int lengthOfLastWord(string s) {
+	int len = 0;
+	for (int i = s.size() - 1; i > -1; i--) {
+		if (isalpha(s[i])) { len++; }
+		else if (s[i] == ' '&&len != 0)break;
+	}
+	return len;
+}
+
+string addBinary(string a, string b) {
+	if (a.size() == 0 || b.size() == 0)return (a.size() == 0 ? b : a);
+	char c = '0';
+	char bitRes = '0';
+	string res = "";
+	int d = a.size() - b.size();
+	if (d > 0)b = string(d, '0') + b;
+	else if (d < 0)a = string(-d, '0') + a;
+	auto iter_a = a.end();
+	auto iter_b = b.end();
+	while (iter_a != a.begin() && iter_b != b.begin()) {
+		iter_a--;
+		iter_b--;
+		bitRes = (*iter_a - '0') + (*iter_b - '0') + (c - '0')+'0';
+		if (bitRes == '2') { c = '1'; bitRes = '0'; }
+		else if (bitRes == '3') { c = '1'; bitRes = '1'; }
+		else { c = '0'; }
+		res = bitRes + res;
+	}
+
+	if (c != '0')res = c + res;
+
+	return res;
 }
