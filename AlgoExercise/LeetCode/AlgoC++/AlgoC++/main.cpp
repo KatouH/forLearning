@@ -5,6 +5,7 @@
 #include<algorithm>
 #include<climits>
 #include<stack>
+#include<queue>
 using namespace std;
 
 
@@ -40,6 +41,18 @@ bool isHappy(int n);
 int missingNumber(vector<int>& nums);
 int lengthOfLastWord(string s);
 string addBinary(string a, string b);
+ListNode* deleteDuplicates(ListNode* head);
+vector<vector<int>> levelOrderBottom(TreeNode* root);
+bool isBalanced(TreeNode* root);
+
+
+template<typename T>
+void pVector(const vector<T>& vec) {
+	for (auto c : vec) {
+		cout << c << " ";
+	}
+	cout << endl;
+}
 
 // 155.min-stack
 class MinStack {
@@ -95,9 +108,11 @@ public:
 int main() {
 	TreeNode* root = new TreeNode(5);
 	root->left = new TreeNode(2);
+	root->left->left = new TreeNode(3);
 	root->right = new TreeNode(13);
 	vector<int> test{ 3,0,1 };
-	cout<<addBinary("1010","1011")<<endl;
+	isBalanced(root);
+	//cout<< <<endl;
 
 	system("pause");
 }
@@ -683,13 +698,6 @@ int mySqrt(int x) {
 	}
 	return i;
 }
-template<typename T>
-void pVector(const vector<T>& vec) {
-	for (auto c: vec) {
-		cout << c << " ";
-	}
-	cout << endl;
-}
  
 TreeNode* sortedArrayToBST(vector<int>& nums) {
 	int mid = nums.size() / 2;
@@ -944,4 +952,182 @@ string addBinary(string a, string b) {
 	if (c != '0')res = c + res;
 
 	return res;
+}
+
+// 1 1 2  双指针？
+ListNode* deleteDuplicates(ListNode* head) {
+	for (auto currNode = head; currNode != NULL;) {
+		if (currNode->next != NULL) {
+			if (currNode->val == currNode->next->val) {
+				auto tmpNode = currNode->next;
+				currNode->next = currNode->next->next;
+				delete tmpNode;
+			}
+			else {
+				currNode = currNode->next;
+			}
+		}
+		else {
+			currNode = currNode->next;
+		}
+	}
+	return head;
+}
+
+
+//递归 循环？
+bool isSameTree(TreeNode* p, TreeNode* q) {
+	if (p == NULL && q == NULL)return true;
+	else if (p == NULL || q == NULL)return false;
+	
+	return (p->val == q->val) && isSameTree(p->right, q->right) && isSameTree(p->left, q->left);
+}
+
+vector<vector<int>> levelOrderBottom(TreeNode* root) {
+	if (root == NULL)return vector<vector<int>>();
+	queue<TreeNode*> floorNode;
+	TreeNode* currNode;
+	vector<int> currFloor;
+	vector<vector<int>> resFloor;
+	vector<TreeNode*> currTFloor;
+
+	floorNode.push(root);
+	while (!floorNode.empty()) {
+		while (!floorNode.empty()) {
+			currNode = floorNode.front();
+			floorNode.pop();
+			currFloor.push_back(currNode->val);
+			currTFloor.push_back(currNode);
+			pVector(currFloor);
+		}
+		for (auto c : currTFloor) {
+			if (c->left != NULL)floorNode.push(c->left);
+			if (c->right != NULL)floorNode.push(c->right);
+		}
+		resFloor.push_back(currFloor);
+		currTFloor.clear();
+		currFloor.clear();
+	}
+	reverse(resFloor.begin(), resFloor.end());
+	return resFloor;
+}
+
+// ++++++++++++++++++++++++++++++++++++++++++++++++递归获得深度
+int getDepth(TreeNode* root) {
+	if (root == NULL)return 0;
+	int depth = max(getDepth(root->left), getDepth(root->right)) + 1;
+	return depth;
+}
+
+bool isBalanced(TreeNode* root) {
+	if (root == NULL)return true;
+	return (abs(getDepth(root->left) - getDepth(root->right))<=1)&&isBalanced(root->right)&&isBalanced(root->left);
+}
+
+
+// 深度递归，注意处理仅在一个方向延伸的树！
+int minDepth(TreeNode* root) {
+	if (root == NULL)return 0;
+	int minDep = 0;
+	int leMin = minDepth(root->left);
+	int riMin = minDepth(root->right);
+	if(leMin!=0&&riMin!=0)minDep = min(leMin, riMin) + 1;
+	else if (leMin != 0 || riMin != 0)minDep = (leMin == 0 ? riMin : leMin);
+	else minDep = 1;
+	return minDep;
+}
+
+//1         0
+//1 1	    1
+//1 2 1     2
+//1 3 3 1   3->n
+//只需要计算 [i-1,1]位置的内容
+//从后往前 中间有该项等于上一项加上本项
+//+++++++++++++++++++++++important
+vector<int> getRow(int rowIndex) {
+	vector<int> row;
+	for (int i = 0; i <= rowIndex; i++) {
+		row.push_back(1);
+		for (int j = i - 1; j > 0; j--) {
+			row[j] += row[j - 1];
+		}
+	}
+	return row;
+}
+
+vector<int> twoSum(vector<int>& numbers, int target) {
+	unordered_map<int, vector<int>> record;
+	vector<int> res;
+	for (int i = 0; i < numbers.size(); i++) {
+		record[numbers[i]].push_back(i + 1);
+	}
+	for (int i = 0; i < numbers.size(); i++) {
+		int tmp = target - numbers[i];
+			if (record.find(tmp) != record.end()) {
+				if (record[tmp][0] != i + 1) {
+					res.push_back(min(record[tmp][0], i + 1));
+					res.push_back(max(record[tmp][0], i + 1));
+				}
+				else {
+					return (record[tmp].size() != 1 ? record[tmp] : vector<int>());
+				}
+		}
+	}
+	return res;
+}
+
+// 将1-26的数转化为0-25的26进制数 每除26减一
+// x*26^n - x*26^0 其中 x(n->0)就表示的是各个位的位数(0-25)
+string convertToTitle(int n) {
+	int i(0), j(n);
+	string res = "";
+	while (j != 0) {
+		j--;
+		i = j % 26;
+		j = j / 26;
+		if(i!=0)res = char(i + 'A') + res;
+	}
+	return res;
+}
+
+// 数据库左连接？？？
+//Select FirstName, LastName, City, State from Person left join Address on Person.PersonId = Address.PersonId
+
+
+vector<int> toNumVec(string str) {
+	int i = 0;
+	unordered_map<char, int> map;
+	vector<int> numVec;
+	for (auto c : str) {
+		if (map.find(c) == map.end())map[c] = i++;
+	}
+	for (auto c : str) {
+		numVec.push_back(map[c]);
+	}
+	return numVec;
+}
+
+// 转换成数字串，每个数字表示当前字符是字符串中第几个新出现的字符
+bool isIsomorphic(string s, string t) {
+	vector<int> vecs = toNumVec(s);
+	vector<int> vect = toNumVec(t);
+	for (int i = 0; i < vecs.size(); i++) {
+		if (vecs[i] != vect[i])return false;
+	}
+	return true;
+}
+
+bool containsNearbyDuplicate(vector<int>& nums, int k) {
+	unordered_map<int, vector<int>> map;
+	for (int i = 0; i < nums.size(); i++) {
+		map[nums[i]].push_back(i);
+	}
+	for (int i = 0; i < nums.size(); i++) {
+		if (map[nums[i]].size() >= 2) {
+			for (int j = map[nums[i]].size() - 1; j > 0; j--) {
+				if (map[nums[i]][j] - map[nums[i]][j - 1] <= k)return true;
+			}
+		}
+	}
+	return false;
 }
