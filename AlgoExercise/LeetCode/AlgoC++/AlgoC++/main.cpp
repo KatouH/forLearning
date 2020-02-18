@@ -6,6 +6,7 @@
 #include<climits>
 #include<stack>
 #include<queue>
+#include<set>
 using namespace std;
 
 
@@ -44,7 +45,10 @@ string addBinary(string a, string b);
 ListNode* deleteDuplicates(ListNode* head);
 vector<vector<int>> levelOrderBottom(TreeNode* root);
 bool isBalanced(TreeNode* root);
-
+int addDigits(int num);
+string getHint(string secret, string guess);
+string reverseVowels(string s);
+int longestPalindrome(string s);
 
 template<typename T>
 void pVector(const vector<T>& vec) {
@@ -53,6 +57,86 @@ void pVector(const vector<T>& vec) {
 	}
 	cout << endl;
 }
+
+// 一个队列 每次push调换顺序将队列前部至于后部
+// 两个队列 一个存储栈顶元素；两个队列交换元素
+class MyStack {
+public:
+	/** Initialize your data structure here. */
+	queue<int> q1;
+	MyStack() {
+	}
+
+	/** Push element x onto stack. */
+	void push(int x) {
+		q1.push(x);
+		for (int i = q1.size(); i > 1; i--) {
+			q1.push(q1.front());
+			q1.pop();
+		}
+	}
+
+	/** Removes the element on top of the stack and returns that element. */
+	int pop() {
+		int popEl = q1.front();
+		q1.pop();
+		return popEl;
+	}
+
+	/** Get the top element. */
+	int top() {
+		return q1.front();
+	}
+
+	/** Returns whether the stack is empty. */
+	bool empty() {
+		return q1.empty();
+	}
+};
+
+class MyQueue {
+public:
+	/** Initialize your data structure here. */
+	stack<int> s1;
+	stack<int> s2;
+	MyQueue() {
+
+	}
+
+	/** Push element x to the back of queue. */
+	void push(int x) {
+		s1.push(x);
+	}
+
+	/** Removes the element from in front of queue and returns that element. */
+	int pop() {
+		if (s2.empty()) {
+			while (!s1.empty()) {
+				s2.push(s1.top());
+				s1.pop();
+			}
+		}
+		int popEl = s2.top();
+		s2.pop();
+		return popEl;
+	}
+
+	/** Get the front element. */
+	int peek() {
+		if (s2.empty()) {
+			while (!s1.empty()) {
+				s2.push(s1.top());
+				s1.pop();
+			}
+		}
+		return s2.top();
+	}
+
+	/** Returns whether the queue is empty. */
+	bool empty() {
+		return s1.empty() && s2.empty();
+	}
+};
 
 // 155.min-stack
 class MinStack {
@@ -111,7 +195,7 @@ int main() {
 	root->left->left = new TreeNode(3);
 	root->right = new TreeNode(13);
 	vector<int> test{ 3,0,1 };
-	isBalanced(root);
+	cout << longestPalindrome("civilwartestingwhetherthatnaptionoranynartionsoconceivedandsodedicatedcanlongendureWeareqmetonagreatbattlefiemldoftzhatwarWehavecometodedicpateaportionofthatfieldasafinalrestingplaceforthosewhoheregavetheirlivesthatthatnationmightliveItisaltogetherfangandproperthatweshoulddothisButinalargersensewecannotdedicatewecannotconsecratewecannothallowthisgroundThebravelmenlivinganddeadwhostruggledherehaveconsecrateditfaraboveourpoorponwertoaddordetractTgheworldadswfilllittlenotlenorlongrememberwhatwesayherebutitcanneverforgetwhattheydidhereItisforusthelivingrathertobededicatedheretotheulnfinishedworkwhichtheywhofoughtherehavethusfarsonoblyadvancedItisratherforustobeherededicatedtothegreattdafskremainingbeforeusthatfromthesehonoreddeadwetakeincreaseddevotiontothatcauseforwhichtheygavethelastpfullmeasureofdevotionthatweherehighlyresolvethatthesedeadshallnothavediedinvainthatthisnationunsderGodshallhaveanewbirthoffreedomandthatgovernmentofthepeoplebythepeopleforthepeopleshallnotperishfromtheearth") << endl;
 	//cout<< <<endl;
 
 	system("pause");
@@ -1130,4 +1214,410 @@ bool containsNearbyDuplicate(vector<int>& nums, int k) {
 		}
 	}
 	return false;
+}
+
+
+// 递归  栈:每出现分支push进入容器
+vector<string> pathVec;
+
+void currTree(TreeNode* root, string path) {
+	if (root->left == NULL && root->right == NULL) {
+		path = to_string(root->val) + path;
+		pathVec.push_back(path);
+		return;
+	}
+	else {
+		path = path + "->" + to_string(root->val);
+		if (root->left == NULL)currTree(root->right, path);
+		else if (root->right == NULL)currTree(root->left, path);
+		else {
+			currTree(root->left, path);
+			currTree(root->right, path);
+		}
+	}
+}
+
+vector<string> binaryTreePaths(TreeNode* root) {
+	if (root = NULL)return vector<string>();
+	currTree(root, "");
+}
+
+
+//不用循环递归 O(1)??
+int addDigits(int num) {
+	int res(0), tmp(num);
+	while (tmp >= 10) {
+		while (tmp != 0) {
+			res += (tmp % 10);
+			tmp = tmp / 10;
+			cout << tmp << " " << res << endl;
+			system("pause");
+		}
+		tmp = res;
+		res = 0;
+	}
+	return tmp;
+}
+
+bool isUgly(int num) {
+	if (num == 0)return false;
+	if (num == 1)return true;
+	return (num % 2 == 0 ? isUgly(num / 2) : false) || (num % 3 == 0 ? isUgly(num / 3) : false) || (num % 5 == 0 ? isUgly(num / 5) : false);
+}
+
+//bool isBadVersion(int version);
+//
+//int firstBadVersion(int n) {
+//	if (n == 1)return 1;
+//	int midSearch = n / 2;
+//	while (!isBadVersion(midSearch)&&midSearch!=n) {
+//		midSearch = (midSearch + n) / 2;
+//	}
+//	int i = midSearch;
+//	for (; isBadVersion(i) && isBadVersion(i - 1); i--);
+//	return i;
+//}
+
+string genPattern(string pattern) {
+	string gen = "";
+	int count=0;
+	unordered_map<char, char> map;
+	for (auto c : pattern) {
+		if (map.find(c) == map.end()) {
+			gen += to_string(count);
+			map[c] = (count++)+'0';
+		}else{
+			gen += map[c];
+		}
+	}
+	return gen;
+}
+
+string genStr(string str) {
+	string gen = "";
+	int count = 0;
+	unordered_map<string, char> map;
+	string tmp = "";
+	for (auto iter = str.begin(); iter != str.end()+1; iter++) {
+		if (*iter != ' ' && iter != str.end()) {
+			tmp += *iter;
+		}
+		else {
+			if (map.find(tmp) == map.end()) {
+				gen += to_string(count);
+				map[tmp] = (count++)+'0';
+			}
+			else {
+				gen += map[tmp];
+			}
+			tmp = "";
+		}
+	}
+	return gen;
+}
+
+bool wordPattern(string pattern, string str) {
+	return genPattern(pattern) == genStr(str);
+}
+
+
+//先找到全相等的元素 替换掉以避免干扰 再找位置不同的元素 找到后替换以免干扰
+string getHint(string secret, string guess) {
+	int bulls = 0;
+	int cows = 0;
+	for (int i = 0; i < secret.size(); i++) {
+		if (secret[i] == guess[i]) { 
+			bulls++;
+			secret[i] = ' ';
+			guess[i] = ' ';
+		}
+	}
+	cout << secret << " " << guess << endl;
+	for (int i = 0; i < secret.size(); i++) {
+		if (secret[i] != ' '&&guess.find(secret[i]) != string::npos) {
+			cows++;
+			guess[guess.find(secret[i])] = ' ';
+		}
+	}
+	return to_string(bulls) + "A" + to_string(cows) + "B";
+}
+
+vector<int> nums;
+int sumRange(int i, int j) {
+	int sum = 0;
+	for (int n = i; n <= j; n++) {
+		sum += nums[n];
+	}
+	return sum;
+}
+
+bool isPowerOfFour(int num) {
+	unsigned powerFour = 1;
+	while (powerFour != 0) {
+		if (powerFour == powerFour | num)return true;
+		else powerFour << 2;
+	}
+	return false;
+}
+
+vector<int> intersection(vector<int>& nums1, vector<int>& nums2) {
+	unordered_map<int, int> map;
+	vector<int> set;
+	for (int i = 0; i < nums1.size(); i++) {
+		if (map.find(nums1[i]) == map.end()) {
+			map[nums1[i]] = i;
+		}
+	}
+
+	for (int i = 0; i < nums2.size(); i++) {
+		if (map.find(nums2[i]) != map.end()) {
+			if (map[nums2[i]] == 1) {
+				set.push_back(nums2[i]);
+				map[nums2[i]]++;
+			}
+		}
+	}
+	return set;
+}
+
+
+string reverseVowels(string s) {
+	if (s == "")return s;
+	int phead = 0;
+	int pfoot = s.size()-1;
+	string vowels = "aeiouAEIOU";
+	while (phead < pfoot) {
+		while (vowels.find(s[phead]) == -1) {
+			if(phead < pfoot)phead++;
+			else break;
+		}
+		while (vowels.find(s[pfoot]) == -1)
+		{
+			if (phead < pfoot)pfoot--;
+			else break;
+		}
+		cout << s[phead] << " " << s[pfoot] << endl;
+		if (phead < pfoot) {
+			char tmp = s[phead];
+			s[phead] = s[pfoot];
+			s[pfoot] = tmp;
+			phead++;
+			pfoot--;
+		}
+	}
+
+	return s;
+}
+
+
+bool isPerfectSquare(int num) {
+	if (num < 2)return true;
+	int sqrtNum = num/2;
+	while(sqrtNum*sqrtNum > num) {
+		sqrtNum--;
+	}
+	if (sqrtNum*sqrtNum == num)return true;
+	else return false;
+}
+
+
+//平方问题牛顿法 x[k+1] = 1/2(x[k]+num/x[k])
+bool isPerfectSquareS1(int num) {
+	if (num < 2)return true;
+	long sqrtNum = num / 2;
+	while (sqrtNum*sqrtNum > num) {
+		sqrtNum = (sqrtNum + num / sqrtNum) / 2;
+	}
+
+	return sqrtNum * sqrtNum == num;
+}
+//利用规律 4 = 1+3;9 = 1+3+5
+bool isPerfectSquareS2(int num) {
+	if (num < 2)return true;
+	int deNum = 1;
+	while (num>0) {
+		num -= deNum;
+		deNum += 2;
+	}
+	return num == 0;
+}
+
+int guess(int num) {
+};
+
+int guessNumber(int n) {
+	if (guess(n) == 0)return n;
+	long mid = n / 2;
+	long low(0), high(n);
+	int res = guess(mid);
+	while (res != 0) {
+		if (res == -1) {
+			high = mid;
+			mid = (low + mid) / 2;
+		}
+		else {
+			low = mid;
+			mid = (high - mid) / 2 + mid;
+		};
+		res = guess(mid);
+	}
+	return mid;
+}
+
+bool canConstruct(string ransomNote, string magazine) {
+	int sizeMa = magazine.size();
+	for (auto c : ransomNote) {
+		if (magazine.find(c) != -1) {
+			magazine.erase(magazine.find(c),1);
+		}
+	}
+
+	return (magazine.size() - sizeMa) == ransomNote.size();
+}
+
+char findTheDifference(string s, string t) {
+	unordered_map<char, int> map;
+	for (auto c : s) {
+		if (map.find(c) != map.end()) {
+			map[c]++;
+		}
+		else map[c] = 1;
+	}
+	for (auto c : t) {
+		if (map.find(c) != map.end()) {
+			map[c]--;
+		}
+		else {
+			return c;
+		}
+	}
+
+	for (auto c : map) {
+		if (c.second == -1)return c.first;
+	}
+	return ' ';
+}
+
+
+// 该题数组快于map
+char findTheDifferenceS1(string s, string t) {
+	int mapS[26] = { 0 };
+	int mapT[26] = { 0 };
+	for (auto c : s) {
+		mapS[c - 'a' - 1]++;
+	}
+	for (auto c : t) {
+		mapT[c - 'a' - 1]++;
+	}
+
+	for (int i = 0; i < 26; i++) {
+		if (mapS[i] != mapT[i])return i + 'a' + 1;
+	}
+	return ' ';
+}
+
+// n&(n-1)能够计算n中1的个数
+int count(int hour){
+	int tmp(hour);
+	int count(0);
+	while (tmp != 0){
+		tmp = tmp&(tmp - 1);
+		count++;
+	}
+	return count;
+}
+// 先判断小时 在半段分钟
+vector<string> readBinaryWatch(int num) {
+	vector<string> res;
+
+	for (int i = 0; i < 12; i++) {
+		if (count(i) == num) {
+			res.push_back(to_string(i) + ":00");
+		}
+		else if(count(i)<num){
+			for (int j = 0; j < 60; j++) {
+				if ((count(i) + count(j)) == num) {
+					res.push_back(to_string(i) + ":" + (j < 10 ? "0" + to_string(j) : to_string(j)));
+				}
+			}
+		}
+	}
+	return res;
+}
+
+bool isSubsequence(string s, string t) {
+	auto sptr = s.begin();
+	auto tptr = t.begin();
+
+	while (sptr != s.end()) {
+		while (tptr!=t.end()&&*sptr != *tptr) {
+			tptr++;
+		}
+		if (tptr == t.end())return false;
+		sptr++;
+		tptr++;
+	}
+	return true;
+}
+
+
+int curTree(TreeNode* node, bool isLeft) {
+	if (node == NULL)return 0;
+	if (node->left == NULL && node->right == NULL) {
+		return isLeft ? node->val : 0;
+	}
+	return curTree(node->left, true) + curTree(node->right, false);
+}
+
+int sumOfLeftLeaves(TreeNode* root) {
+	if (root == NULL || (root->left == NULL && root->right == NULL))return 0;
+	return curTree(root->left, true) + curTree(root->right, false);
+}
+
+string toHex(int num) {
+	int bHex;
+	string hex = "";
+	if (num == 0)return "0";
+	while (num != 0 && num != -1) {
+		bHex = num & 15;
+		hex = char(bHex < 10 ? bHex + '0' : (bHex - 10) + 'a') + hex;
+		num = num >> 4;
+	}
+
+	hex = num == 0 ? hex : string(8 - hex.size(), 'f') + hex;
+	return hex;
+}
+
+int longestPalindrome(string s) {
+	unordered_map<char, int> smap;
+	bool Odd = false;
+	int maxLen = 0;
+	for (auto c : s) {
+		if (smap.find(c) != smap.end())smap[c]++;
+		else smap[c] = 1;
+	}
+	for (auto c : smap) {
+		if (c.second % 2 == 0) {
+			maxLen += c.second;
+		}
+		else {
+			maxLen += c.second - 1;
+			Odd = true;
+		}
+	}
+
+	return maxLen + (Odd ? 1 : 0);
+}
+
+
+// set 有序唯一！！！ set的iterator 没有+，-，+=，-=的函数重载
+int thirdMax(vector<int>& nums) {
+	set<int> s(nums.begin(),nums.end());
+	auto it = s.end();
+	it--;
+	if (s.size() >= 3) {
+		it--;
+		it--;
+	}
+	return *it;
 }
